@@ -10,7 +10,7 @@ class Matrix{
         for (let y = 0; y < process.stdout.rows; y++){
             this.matrix.push('');
             for (let x = 0; x < process.stdout.columns; x++){
-                if (Math.random() < 0.25){
+                if (Math.random() < 0.1){
                     this.matrix[y] += characterList[Math.floor(Math.random() * characterList.length)];
                 } else {
                     this.matrix[y] += ' ';
@@ -25,7 +25,7 @@ class Matrix{
         this.matrix.shift();
         this.matrix.push('');
         for (let x = 0; x < process.stdout.columns; x++){
-            if (Math.random() < 0.25){
+            if (Math.random() < 0.1){
                 this.matrix[this.matrix.length - 1] += characterList[Math.floor(Math.random() * characterList.length)];
             } else {
                 this.matrix[this.matrix.length - 1] += ' ';
