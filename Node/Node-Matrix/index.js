@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import readline from 'readline';
 
-var characterList = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890$£%&#@~';
+var characterList = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890$£%&#@~?';
 
 class Matrix{
     constructor(){
