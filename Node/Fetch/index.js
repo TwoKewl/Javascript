@@ -83,6 +83,8 @@ async function getAllInfo(){
     let hours = date.getHours() % 12;
     let minutes = date.getMinutes();
 
+    if (minutes < 10) minutes = '0' + minutes;
+    if (hours < 10) hours = '0' + hours;
 
     let time = `   ${hours}:${minutes}`;
     if (date.getHours() <= 12){
@@ -103,9 +105,9 @@ async function getAllInfo(){
 
     info.push(`${time}`);
     info.push(`${bar}`);
-    info.push(`USER: ${os.userInfo().username}`);
-    info.push(`DEVICE: ${os.hostname()}`);
-    info.push(`UPTIME: ${uptimeDays} days, ${uptimeHours} hours, ${uptimeMinutes} mins`);
+    info.push(`${chalk.blueBright(`${chalk.bold(`USER: ${chalk.reset(os.userInfo().username)}`)}`)}`);
+    info.push(`${chalk.blueBright(`${chalk.bold(`DEVICE: ${chalk.reset(os.hostname())}`)}`)}`);
+    info.push(`${chalk.blueBright(`${chalk.bold(`UPTIME: ${chalk.reset(`${uptimeDays} days, ${uptimeHours} hours, ${uptimeMinutes} mins`)}`)}`)}`);
 
     bar = '';
     for (let i = 0; i < 40; i++){
@@ -120,8 +122,7 @@ async function getCPUInfo(){
     const info = [];
     const cpu = (await si.cpu()).brand;
 
-
-    info.push(`CPU: ${cpu}`);
+    info.push(`${chalk.blueBright(`${chalk.bold(`CPU: ${chalk.reset(cpu)}`)}`)}`);
 
     var bar = '';
     for (let i = 0; i < 40; i++){
@@ -137,7 +138,7 @@ async function getGPUInfo(){
     var gpu = (await si.graphics()).controllers;
 
     gpu.forEach((e) => {
-        info.push(`GPU: ${e.model}`)
+        info.push(`${chalk.blueBright(`${chalk.bold(`GPU: ${chalk.reset(e.model)}`)}`)}`);
     });
 
     var bar = '';
@@ -154,7 +155,9 @@ async function getResolution(){
     const graphics = await si.graphics();
 
     graphics.displays.forEach(e => {
-        info.push(`DISPLAY ${graphics.displays.indexOf(e)}: ${e.resolutionX}x${e.resolutionY}`);
+        info.push(`${chalk.blueBright(`${chalk.bold(`DISPLAY ${graphics.displays.indexOf(e)}:`)}`)}`);
+        info.push(`RESOLUTION: ${e.resolutionX}x${e.resolutionY}`);
+        info.push(`HZ: ${e.currentRefreshRate}`);
     });
 
     var bar = '';
