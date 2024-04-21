@@ -1,5 +1,5 @@
-const chalk = require('chalk');
-const readline = require('readline');
+import chalk from 'chalk';
+import readline from 'readline';
 
 var characterList = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890$£%&#@~';
 
