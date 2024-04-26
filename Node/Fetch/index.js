@@ -86,11 +86,11 @@ async function getAllInfo(){
     if (minutes < 10) minutes = '0' + minutes;
     if (hours < 10) hours = '0' + hours;
 
-    let time = `   ${hours}:${minutes}`;
+    let time = `${hours}:${minutes}`;
     if (date.getHours() <= 12){
-        time += `am   `;
+        time += `am`;
     } else {
-        time += `pm   `;
+        time += `pm`;
     }
 
     let uptimeDays = Math.floor(os.uptime() / 86400).toString();
@@ -103,7 +103,7 @@ async function getAllInfo(){
     }
     info.push(bar);
 
-    info.push(`${time}`);
+    info.push(`${chalk.green('NODE-FETCH')} - ${time}`);
     info.push(`${bar}`);
     info.push(`${chalk.blueBright(`${chalk.bold(`USER: ${chalk.reset(os.userInfo().username)}`)}`)}`);
     info.push(`${chalk.blueBright(`${chalk.bold(`DEVICE: ${chalk.reset(os.hostname())}`)}`)}`);
