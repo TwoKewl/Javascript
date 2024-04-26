@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-function main(token, renderer){
+function main(token, taskPrinter){
     let date = new Date();
     today = date.toISOString().split('T')[0];
     future = getDateIn2Weeks();
@@ -41,14 +41,20 @@ function main(token, renderer){
             }
         });
 
-        notCompleted.forEach(task => {
-            renderer.render(task);
+        console.log("COMPLETED TASKS: ");
+        completed.forEach(task => {
+            taskPrinter.print(task);
         })
+
+        console.log("UNCOMPLETED TASKS: ");
+        notCompleted.forEach(task => {
+            taskPrinter.print(task);
+        });
     })
 }
 
 
-class Renderer{
+class taskPrinter{
     constructor(){
         process.stdout.write('\x1Bc');
     }
@@ -58,11 +64,11 @@ class Renderer{
         return str.replace(regex, replaceValue);
     }
 
-    render(task){
-        console.log(`Title: ${task.class_task_title}`);
-        console.log(`Subject: ${task.subject}`);
-        console.log(`Due on: ${this.replaceChars(task.due_on.slice(0, 10), '-', '/')}`);
-        console.log(`Set by: ${task.teacher_name}`);
+    print(task){
+        console.log(`   Title: ${task.class_task_title}`);
+        console.log(`   Subject: ${task.subject}`);
+        console.log(`   Due on: ${this.replaceChars(task.due_on.slice(0, 10), '-', '/')}`);
+        console.log(`   Set by: ${task.teacher_name}`);
         console.log(``);
     }
 }
@@ -70,7 +76,7 @@ class Renderer{
 const envFilePath = path.resolve(__dirname, '.env');
 
 fs.readFile(envFilePath, 'utf8', (err, data) => {
-    var renderer = new Renderer();
+    var renderer = new taskPrinter();
     if (err) {
         console.error('Error reading .env file:', err);
         return;
