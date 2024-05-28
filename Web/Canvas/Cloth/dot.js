@@ -4,19 +4,22 @@ export class Dot {
         this.x = x;
         this.y = y;
         this.fixed = fixed;
-        this.dx = 0;
-        this.dy = 0;
+        this.bx = x;
+        this.by = y;
     }
 
     tick() {
-        if (!this.fixed) {
-            this.dy += 0.002;
-            this.y += this.dy;
-            this.x += this.dx;
-        } else {
-            this.dx = 0;
-            this.dy = 0;
-        }
+        if (this.fixed) return;
+
+        let dx = this.x- this.bx;
+        let dy = this.y - this.by + 0.001;
+
+        this.bx = this.x;
+        this.by = this.y;
+
+
+        this.x += dx;
+        this.y += dy;
     }
 
     setFixed(fixed) {
