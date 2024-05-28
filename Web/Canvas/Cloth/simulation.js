@@ -23,7 +23,7 @@ export class Simulation {
                 if (x < this.dotsAcross - 1) this.connections.push(new Connection(this.dots[x + y * this.dotsAcross], this.dots[x + 1 + y * this.dotsAcross], 1.2));
                 if (y < this.dotsDown - 1) this.connections.push(new Connection(this.dots[x + y * this.dotsAcross], this.dots[x + (y + 1) * this.dotsAcross], 1.2));
 
-                if (y == 0 && x % 4 == 0) {
+                if (y == 0 && x % 12 == 0) {
                     this.dots[x + y * this.dotsAcross].setFixed(true);
                 }
             }  
@@ -31,11 +31,8 @@ export class Simulation {
     }
 
     tick() {
-        this.dots.forEach((dot) => {
-            dot.tick();
-        });
-        this.connections.forEach(connection => {
-            connection.tick();
-        })
+        this.dots.forEach((dot) => dot.tick());
+        this.connections.forEach(connection => connection.tick());
+        this.connections.forEach(connection => connection.tick());
     }
 }
