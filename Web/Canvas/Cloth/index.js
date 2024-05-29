@@ -47,11 +47,11 @@ function clearScreen(r, g, b){
     rect(0, 0, canvas.width, canvas.height, r, g, b, 1);
 }
 
-const simulation = new Simulation(100, 20);
-const renderer = new Renderer(simulation, 100);
+export const simulation = new Simulation(50, 20);
+export const renderer = new Renderer(simulation, 20);
 
 function tick() {
-    clearScreen(0, 0, 1);
+    clearScreen(0, 0, 20);
     renderer.render();
     simulation.tick();
 }

@@ -10,7 +10,7 @@ export class Simulation {
 
         for (let y = 0; y < dotsDown; y++) {
             for (let x = 0; x < dotsAcross; x++) {
-                this.dots.push(new Dot(x, y));
+                this.dots.push(new Dot(x + (Math.random() / 2), y + (Math.random() / 5), false));
             }
         }
 
