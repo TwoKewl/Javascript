@@ -24,10 +24,11 @@ export class Renderer {
         this.initChessPieces(board);
     }
 
-    update(board = 0) {
+    update() {
         draw.clearScreen(135, 206, 235, 1);
 
         this.drawBoard();
+        this.drawPieces();
     }
 
     initChessPieces(board) {
@@ -38,7 +39,6 @@ export class Renderer {
                 this.images[`White ${piece}`] = white;
 
                 if (Object.keys(this.images).length == 12) {
-                    console.log(this.images);
                     this.drawPieces(board);
                 }
             };
@@ -49,7 +49,6 @@ export class Renderer {
                 this.images[`Black ${piece}`] = black;
 
                 if (Object.keys(this.images).length == 12) {
-                    console.log(this.images);
                     this.drawPieces(board);
                 }
             };
@@ -76,9 +75,6 @@ export class Renderer {
                         let colour = piece.colour == 1 ? "White" : "Black";
                         let type = piece.type;
 
-                        console.log(piece);
-                        console.log(`Drawing ${colour} ${type} at ${piece.x}, ${piece.y}`)
-
                         this.ctx.drawImage(this.images[`${colour} ${type}`], piece.x * this.cellSize[0] + window.screen.width / 2 - this.cellSize[0] * 4, piece.y * this.cellSize[1] + window.screen.height / 2 - this.cellSize[1] * 4, this.cellSize[0], this.cellSize[1]);
                     }
                 });
@@ -87,11 +83,9 @@ export class Renderer {
     }
 
     showMoves(moves) {
-        console.log(moves);
         moves.forEach((move) => {
             let start = move[0];
             let end = move[1];
-            console.log(move, start, end);
 
             let x1 = start[0] * this.cellSize[0] + window.screen.width / 2 - this.cellSize[0] * 4 + this.cellSize[0] / 2;
             let y1 = start[1] * this.cellSize[1] + window.screen.height / 2 - this.cellSize[1] * 4 + this.cellSize[1] / 2;

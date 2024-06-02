@@ -7,7 +7,8 @@ export class Board {
         this.board = this.loadBoard(loadString);
         this.renderer.init(this.board);
 
-        this.getAllMoves(1);
+        var moves = this.getAllMoves(1);
+        this.renderer.showMoves(moves);
 
         this.pieces = [];
         
@@ -87,7 +88,7 @@ export class Board {
 
         board.forEach(row => {
             row.forEach(piece => {
-                if (piece != 0 && piece.type == 'Pawn') {
+                if (piece != 0 && (piece.type == 'Pawn' || piece.type == 'Knight')) {
                     piece.setBoard(board);
                 }
             });
@@ -101,14 +102,26 @@ export class Board {
 
         this.board.forEach(row => {
             row.forEach(piece => {
-                if (piece != 0 && piece.type == "Pawn" && piece.colour == colour) {
+                if (piece != 0 && (piece.type == 'Pawn' || piece.type == 'Knight') && piece.colour == colour) {
                     moves.push(...piece.getMoves());
                 }
             });
         });
 
-        this.renderer.showMoves(moves);
-
         return moves;
+    }
+
+    makeMove(x, y, nx, ny) {
+        var piece = this.board[y][x];
+        if (piece) {
+            this.board[y][x] = 0;
+            this.board[ny][nx] = piece;
+            piece.x = nx;
+            piece.y = ny;
+            this.renderer.drawBoard();
+            var moves = this.getAllMoves(1);
+            this.renderer.showMoves(moves);
+            this.renderer.drawPieces(this.board);
+        }
     }
 }
