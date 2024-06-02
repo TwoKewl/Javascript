@@ -1,17 +1,18 @@
 import * as draw from './drawing.js';
 
+draw.init(document.getElementById('canvas').getContext('2d'));
+
 export class Renderer {
     constructor() {
-        this.canvas = document.getElementById("canvas");
-        this.ctx = this.canvas.getContext("2d");
+        this.canvas = document.getElementById('canvas');
+        this.ctx = document.getElementById('canvas').getContext('2d');
+        draw.init(this.ctx);
         this.cellSize = [100, 100];
 
         this.imagePath = './../assets/';
     }
 
     init(board) {
-        draw.init(this.ctx);
-
         this.canvas.oncontextmenu = function(e) { e.preventDefault(); e.stopPropagation(); };
         this.canvas.width = window.screen.width;
         this.canvas.height = window.screen.height;
@@ -72,7 +73,7 @@ export class Renderer {
             board.forEach((row) => {
                 row.forEach((piece) => {
                     if (piece != 0) {
-                        let colour = piece.colour == 0 ? "White" : "Black";
+                        let colour = piece.colour == 1 ? "White" : "Black";
                         let type = piece.type;
 
                         console.log(piece);
@@ -83,5 +84,22 @@ export class Renderer {
                 });
             });
         }
+    }
+
+    showMoves(moves) {
+        console.log(moves);
+        moves.forEach((move) => {
+            let start = move[0];
+            let end = move[1];
+            console.log(move, start, end);
+
+            let x1 = start[0] * this.cellSize[0] + window.screen.width / 2 - this.cellSize[0] * 4 + this.cellSize[0] / 2;
+            let y1 = start[1] * this.cellSize[1] + window.screen.height / 2 - this.cellSize[1] * 4 + this.cellSize[1] / 2;
+            let x2 = end[0] * this.cellSize[0] + window.screen.width / 2 - this.cellSize[0] * 4 + this.cellSize[0] / 2;
+            let y2 = end[1] * this.cellSize[1] + window.screen.height / 2 - this.cellSize[1] * 4 + this.cellSize[1] / 2;
+
+            draw.line(x1, y1, x2, y2, 255, 0, 0, 1, 5);
+            draw.circle(x2, y2, 10, 255, 0, 0, 1);
+        });
     }
 }

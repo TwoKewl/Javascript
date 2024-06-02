@@ -1,14 +1,16 @@
-import { rect } from './drawing.js';
 import * as piece from './piece.js';
 import { Renderer } from './renderer.js';
 
 export class Board {
     constructor(loadString) {
-        this.board = this.loadBoard(loadString);
-        this.pieces = [];
         this.renderer = new Renderer();
-        console.log(this.board);
+        this.board = this.loadBoard(loadString);
         this.renderer.init(this.board);
+
+        this.getAllMoves(1);
+
+        this.pieces = [];
+        
         // this.renderer.initChessPieces(this.board);
     }
 
@@ -34,6 +36,7 @@ export class Board {
                 board.push(row);
                 row = [];
             } else if (!isNaN(char)) {
+                for (let i = 0; i < parseInt(char); i++) row.push(0);
                 x += parseInt(char);
             } else {
                 switch (char) {
@@ -82,6 +85,30 @@ export class Board {
 
         });
 
+        board.forEach(row => {
+            row.forEach(piece => {
+                if (piece != 0 && piece.type == 'Pawn') {
+                    piece.setBoard(board);
+                }
+            });
+        });
+
         return board;
+    }
+
+    getAllMoves(colour) {
+        var moves = [];
+
+        this.board.forEach(row => {
+            row.forEach(piece => {
+                if (piece != 0 && piece.type == "Pawn" && piece.colour == colour) {
+                    moves.push(...piece.getMoves());
+                }
+            });
+        });
+
+        this.renderer.showMoves(moves);
+
+        return moves;
     }
 }
