@@ -1,55 +1,31 @@
-import { rect, circle } from './drawing.js';
-import { Piece } from './piece.js';
-
-const cellSize = [100, 100];
+import { rect } from './drawing.js';
+import * as piece from './piece.js';
+import { Renderer } from './renderer.js';
 
 export class Board {
-    constructor(loadString, ) {
+    constructor(loadString) {
         this.board = this.loadBoard(loadString);
         this.pieces = [];
-    }
-
-    drawSquare(x, y) {
-        var dx = (x - 4) * cellSize[0] + window.screen.width / 2;
-        var dy = (y - 4) * cellSize[1] + window.screen.height / 2;
-
-        if ((x + y) % 2 == 0) {
-            rect(dx, dy, cellSize[0], cellSize[1], 238, 238, 210, 1);
-        } else {
-            rect(dx, dy, cellSize[0], cellSize[1], 58, 86, 150, 1);
-        }
-    }
-
-    drawBoard() {
-        for (var i = 0; i < 8; i++) {
-            for (var j = 0; j < 8; j++) {
-                this.drawSquare(i, j);
-            }
-        }
-
-        this.board.forEach((row) => {
-            row.forEach((piece) => {
-                if (piece != -1) {
-                    piece.renderPiece();
-                }
-            });
-        });
+        this.renderer = new Renderer();
+        console.log(this.board);
+        this.renderer.init(this.board);
+        // this.renderer.initChessPieces(this.board);
     }
 
     loadBoard(input) {
         var board = [];
-        let row = [];
-        let x = 0;
+        var row = [];
+        var x = 0;
+        var y = 0;
 
-        let y = 0;
-        if (input[input.length - 1] != '/') {
+        if (input[input.length - 1] != "/") {
             input += '/';
         }
 
         input.split('').forEach((char) => {
             if (char == '/') {
                 for (let i = x; i < 8; i++) {
-                    row.push(-1);
+                    row.push(0);
                 }
 
                 x = 0;
@@ -57,46 +33,55 @@ export class Board {
 
                 board.push(row);
                 row = [];
+            } else if (!isNaN(char)) {
+                x += parseInt(char);
             } else {
-                if (!isNaN(char)) {
-                    for (let i = x; i < parseInt(char); i++) {
-                        row.push(-1);
-                    }
-                    x++;
-                } else {
-                    if ('rnbqkp'.includes(char.toLowerCase())) {
-                        row.push(new Piece(char.toLowerCase(), char == char.toLowerCase() ? 0 : 1, x, y, this.ctx));
-                        x++;
-                    }
+                switch (char) {
+                    case "p":
+                        row.push(new piece.Pawn(x, y, 0));
+                        break;
+                    case "P":
+                        row.push(new piece.Pawn(x, y, 1));
+                        break;
+                    case "n":
+                        row.push(new piece.Knight(x, y, 0));
+                        break;
+                    case "N":
+                        row.push(new piece.Knight(x, y, 1));
+                        break;
+                    case "b":
+                        row.push(new piece.Bishop(x, y, 0));
+                        break;
+                    case "B":
+                        row.push(new piece.Bishop(x, y, 1));
+                        break;
+                    case "r":
+                        row.push(new piece.Rook(x, y, 0));
+                        break;
+                    case "R":
+                        row.push(new piece.Rook(x, y, 1));
+                        break;
+                    case "q":
+                        row.push(new piece.Queen(x, y, 0));
+                        break;
+                    case "Q":
+                        row.push(new piece.Queen(x, y, 1));
+                        break;
+                    case "k":
+                        row.push(new piece.King(x, y, 0));
+                        break;
+                    case "K":
+                        row.push(new piece.King(x, y, 1));
+                        break;
+                    default:
+                        row.push(0);
                 }
-            }
-        });
 
-        board.forEach((row) => {
-            row.forEach((piece) => {
-                if (piece != -1) {
-                    piece.setBoard(board);
-                }
-            });
+                x++;
+            }
+
         });
 
         return board;
-    }
-
-    getAllMoves(colour) {
-        let moves = [];
-
-        this.board.forEach((row) => {
-            row.forEach((piece) => {
-                if (piece != -1 && piece.colour == colour) {
-                    let pieceMoves = piece.getMoves(colour);
-                    if (pieceMoves) {
-                        moves.push(...pieceMoves);
-                    }
-                }
-            });
-        });
-
-        return moves;
     }
 }
