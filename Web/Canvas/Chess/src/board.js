@@ -88,7 +88,7 @@ export class Board {
 
         board.forEach(row => {
             row.forEach(piece => {
-                if (piece != 0 && (piece.type == 'Pawn' || piece.type == 'Knight')) {
+                if (piece != 0) {
                     piece.setBoard(board);
                 }
             });
@@ -96,13 +96,23 @@ export class Board {
 
         return board;
     }
+    
+    setBoardForAllPieces() {
+        this.board.forEach(row => {
+            row.forEach(piece => {
+                if (piece != 0) {
+                    piece.setBoard(this.board);
+                }
+            });
+        });
+    }
 
     getAllMoves(colour) {
         var moves = [];
 
         this.board.forEach(row => {
             row.forEach(piece => {
-                if (piece != 0 && (piece.type == 'Pawn' || piece.type == 'Knight') && piece.colour == colour) {
+                if (piece != 0 && piece.colour == colour) {
                     moves.push(...piece.getMoves());
                 }
             });
@@ -114,14 +124,32 @@ export class Board {
     makeMove(x, y, nx, ny) {
         var piece = this.board[y][x];
         if (piece) {
+            // console.log(piece);
+
             this.board[y][x] = 0;
             this.board[ny][nx] = piece;
             piece.x = nx;
             piece.y = ny;
-            this.renderer.drawBoard();
+
+            if (piece.type == "Pawn" && (ny == 0 || ny == 7)) {
+                console.log("PROMOTION");
+                this.handlePawnPromotion(nx, ny);
+            }
+            
             var moves = this.getAllMoves(1);
-            this.renderer.showMoves(moves);
-            this.renderer.drawPieces(this.board);
+            this.renderer.onPieceMove(this.board, moves);
+        }
+    }
+
+    handlePawnPromotion(x, y) {
+        var pieceOnBoard = this.board[y][x];
+
+        console.log(pieceOnBoard);
+
+        if (pieceOnBoard) {
+            console.log(`Pawn at ${x}, ${y} is being promoted`);
+            this.board[y][x] = new piece.Queen(x, y, pieceOnBoard.colour);
+            this.setBoardForAllPieces();
         }
     }
 }

@@ -9,7 +9,8 @@ export class Renderer {
         draw.init(this.ctx);
         this.cellSize = [100, 100];
 
-        this.imagePath = './../assets/';
+        this.imagePath = './../assets/pieces/';
+        this.soundPath = './../assets/sounds/';
     }
 
     init(board) {
@@ -92,8 +93,17 @@ export class Renderer {
             let x2 = end[0] * this.cellSize[0] + window.screen.width / 2 - this.cellSize[0] * 4 + this.cellSize[0] / 2;
             let y2 = end[1] * this.cellSize[1] + window.screen.height / 2 - this.cellSize[1] * 4 + this.cellSize[1] / 2;
 
-            draw.line(x1, y1, x2, y2, 255, 0, 0, 1, 5);
-            draw.circle(x2, y2, 10, 255, 0, 0, 1);
+            draw.line(x1, y1, x2, y2, 255, 0, 0, 1, 2);
+            draw.circle(x2, y2, 3, 255, 0, 0, 1);
         });
+    }
+
+    onPieceMove(board, moves) {
+        var moveSound = new Audio(this.soundPath + 'move.mp3');
+        moveSound.play();
+
+        this.drawBoard();
+        this.showMoves(moves);
+        this.drawPieces(board);
     }
 }
