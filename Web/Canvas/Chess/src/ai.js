@@ -11,9 +11,19 @@ export class AI {
         this.evaluate();
     }
 
-    pickMove() {
+    pickMove(boardInstance) {
         var moves = this.getAllMoves();
-        return moves[Math.floor(Math.random() * moves.length)];
+        var evaluations = [];
+
+        moves.forEach(move => {
+            var pieces = this.makeMove(boardInstance, move[0][0], move[0][1], move[1][0], move[1][1]);
+            evaluations.push([move, this.evaluate()]);
+            this.undoMove(boardInstance, pieces[0], pieces[1], move[0][0], move[0][1], move[1][0], move[1][1]);
+        });
+
+        var bestMove = evaluations.reduce((a, b) => a[1] < b[1] ? a : b);
+
+        return bestMove[0];
     }
 
     getAllMoves() {
@@ -42,7 +52,8 @@ export class AI {
         var whiteEval = this.countMaterial(1, pawnValue, knightValue, bishopValue, rookValue, queenValue, kingValue);
 
         var evaluation = whiteEval - blackEval;
-        console.log(evaluation);
+
+        return evaluation;
     }
 
     countMaterial(colour, pawnValue, knightValue, bishopValue, rookValue, queenValue, kingValue) {
@@ -80,9 +91,47 @@ export class AI {
         return material;
     }
 
-    search(depth) {
-        if (depth == 0) {
-            return this.evaluate();
+    search(boardInstance, depth) {
+        
+    }
+
+    checkInCheck() {
+        var kingPos = this.getKingPos();
+        var kingX = kingPos[0];
+        var kingY = kingPos[1];
+
+        var moves = this.getAllMoves();
+
+        var check = moves.find(move => move[1][0] == kingX && move[1][1] == kingY);
+
+        if (check) {
+            
+        }
+    }
+
+    makeMove(boardInstance, x, y, nx, ny) {
+        var piece = boardInstance.board[y][x];
+        var takenPiece = boardInstance.board[ny][nx];
+        if (piece) {
+            boardInstance.board[y][x] = 0;
+            boardInstance.board[ny][nx] = piece;
+            piece.x = nx;
+            piece.y = ny;
+        }
+
+        return [piece, takenPiece];
+    }
+
+    undoMove(boardInstance, piece, takenPiece, px, py, tx, ty) {
+        if (piece) {
+            boardInstance.board[py][px] = piece;
+            piece.x = px;
+            piece.y = py;
+            boardInstance.board[ty][tx] = takenPiece;
+            if (takenPiece) {
+                takenPiece.x = tx;
+                takenPiece.y = ty;
+            }
         }
     }
 }

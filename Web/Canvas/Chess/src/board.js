@@ -102,32 +102,34 @@ export class Board {
         });
     }
 
-    checkCheckmate() {
-        var moves = [...this.getAllMoves(0), ...this.getAllMoves(1)];
-        var board = this.board;
-    
-        for (let i = 0; i < 2; i++) {
-            var row = board.find((row) => row.find((piece) => piece.type == 'King' && piece.colour == i));
+    checkCheckmate(colour) {
+        var check = this.isInCheck(colour);
+
+        if (check) {
+
+        }
+    }
+
+    isInCheck(colour) {
+        if (!this.copy) {
+            var row = this.board.find((row) => row.find((piece) => piece.type == 'King' && piece.colour == colour));
             if (row) {
-                var king = row.find((piece) => piece.type == 'King' && piece.colour == i);
+                var king = row.find((piece) => piece.type == 'King' && piece.colour == colour);
                 if (king) {
                     var kingLocation = [king.x, king.y];
-    
+
+                    var moves = this.getAllMoves(colour);
+
                     for (const move of moves) {
                         if (move[1][0] == kingLocation[0] && move[1][1] == kingLocation[1]) {
-                            var classCopy = new BoardCopy(this.board);
-                            // Don't make the move, just check if it's possible
-                            if (!classCopy.isInCheck(i)) {
-                                return false;
-                            }
+                            console.log(`Check for ${colour == 0 ? 'Black' : 'White'} at (${move[1][0]}, ${move[1][1]})`);
+                            return true;
                         }
                     }
-    
-                    return true;
                 }
-            }
+            }  
         }
-    
+
         return false;
     }
 
@@ -184,20 +186,23 @@ class BoardCopy {
     }
 
     isInCheck(colour) {
-        var moves = this.getAllMoves(colour);
+        if (!this.copy) {
+            var row = this.board.find((row) => row.find((piece) => piece.type == 'King' && piece.colour == colour));
+            if (row) {
+                var king = row.find((piece) => piece.type == 'King' && piece.colour == colour);
+                if (king) {
+                    var kingLocation = [king.x, king.y];
 
-        for (const row of this.board) {
-            for (const piece of row) {
-                if (piece != 0 && piece.type == 'King' && piece.colour == colour) {
-                    var kingLocation = [piece.x, piece.y];
+                    var moves = this.getAllMoves(colour);
 
                     for (const move of moves) {
                         if (move[1][0] == kingLocation[0] && move[1][1] == kingLocation[1]) {
+                            console.log(`Check for ${colour == 0 ? 'Black' : 'White'} at (${move[1][0]}, ${move[1][1]})`);
                             return true;
                         }
                     }
                 }
-            }
+            }  
         }
 
         return false;

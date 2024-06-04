@@ -33,17 +33,18 @@ canvas.addEventListener('mousedown', (e) => {
         if (selectedPiece && selectedPiece.colour == turn && (b.board[y] && (b.board[y][x] == 0 || (b.board[y][x] && b.board[y][x].colour != selectedPiece.colour)))) {
             console.log(selectedPieceMoves);
             if (selectedPieceMoves.find(move => move[0] == x && move[1] == y)) {
-                b.makeMove(selectedPiece.x, selectedPiece.y, x, y, false);
+                b.makeMove(selectedPiece.x, selectedPiece.y, x, y);
                 turn += 1;
                 turn %= 2;
 
                                     
                 ai.setBoard(b.board);
-                var move = ai.pickMove();
+                var move = ai.pickMove(b);
                 var start = move[0];
                 var end = move[1];
 
-                b.makeMove(start[0], start[1], end[0], end[1], false);
+                console.log(b, start, end);
+                b.makeMove(start[0], start[1], end[0], end[1]);
 
                 turn += 1;
                 turn %= 2;
