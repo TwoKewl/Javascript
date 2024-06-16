@@ -5,6 +5,6 @@ module.exports = {
     "category": "misc",
     "callback": function(args, context) {
         console.clear();
-        process.stdout.write(`${context.account.username}@${context.device}\n\n`);
+        console.log(`${context.account.username}@${context.device}`);
     }
 }

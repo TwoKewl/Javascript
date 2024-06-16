@@ -2,6 +2,7 @@ const readline = require('readline');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+const chalk = require('chalk');
 
 class Terminal {
     constructor() {
@@ -21,10 +22,10 @@ class Terminal {
             this.rl.question("Enter your password: ", (password) => {
                 if (this.login(username, password)) {
                     console.clear();
-                    console.log(`${this.account.username}@${os.hostname()}\n`);
+                    console.log(`${this.account.username}@${os.hostname()}`);
                     this.startTerminal();
                 } else {
-                    console.log("Login failed. Please try again.");
+                    console.log(chalk.redBright("Login failed. Please try again."));
                     this.attemptLogin();
                 }
             });
@@ -42,17 +43,19 @@ class Terminal {
     }
 
     startTerminal() {
-        this.rl.question(`${this.path} :~$ `, (command) => {
+        this.rl.question(`\n${this.path} :~$ `, (command) => {
             this.handleCommand(command);
         });
     }
 
     handleCommand(command) {
+        this.registerCommands();
+
         const [commandName, ...args] = command.split(' ');
         const commandInfo = this.commands.get(commandName);
 
         if (!commandInfo) {
-            console.log(`Command not found.`);
+            console.log(chalk.redBright(`Command '${commandName}' not found.`));
             this.startTerminal();
             return;
         }
@@ -83,9 +86,6 @@ class Terminal {
                 callback(args, context);
                 this.startTerminal();
             }
-        } else {
-            console.log(`Command ${commandName} not found.`);
-            this.startTerminal();
         }
     }
 
@@ -106,7 +106,9 @@ class Terminal {
 
         for (const file of commandFiles) {
             const command = file.split('.')[0];
-            const contents = require(path.join(__dirname, '..', 'commands', file));
+            const commandPath = path.join(__dirname, '..', 'commands', file);
+            delete require.cache[require.resolve(commandPath)];
+            const contents = require(commandPath);
             const callback = {"callback": contents.callback, "adminRequired": contents.adminRequired, "description": contents.description, "category": contents.category};
 
             this.addCommand(command, callback);
@@ -154,6 +156,53 @@ class Terminal {
             }
         });
         
+        this.addCommand('setAdmin', { 
+            "description": "Sets a user as an admin.",
+            "adminRequired": true,
+            "category": "admin",
+            "callback": (args, context) => {
+                if (args.length != 2) return;
+    
+                const [username, admin] = args;
+            
+                const fs = require('fs');
+                const { join } = require('path');
+    
+                const users = JSON.parse(fs.readFileSync(join(__dirname, '..', 'src', 'users.json'), 'utf8'));
+    
+                if (username) {
+                    if (context.account.admin === false) {
+                        console.log("You do not have permission to run this command.");
+                        return;
+                    }
+                    const user = users.find(user => user.username === username);
+    
+                    if (!user) {
+                        console.log("User not found.");
+                        return;
+                    } else {
+                        user.admin = admin === 'true' ? true : false;
+                        fs.writeFileSync(join(__dirname, '..', 'src', 'users.json'), JSON.stringify(users, null, 4), 'utf-8');
+                        
+                        if (this.account.username === username) {
+                            this.account.admin = admin === 'true' ? true : false;
+                        }
+    
+                        admin === 'true' ? console.log(chalk.green(`User ${username} is now an admin!`)) : console.log(chalk.red(`User ${username} is no longer an admin!`));
+                    }
+                }
+            }
+        });
+
+        this.addCommand('refreshCommands',  {
+            "description": "Refreshes the list of commands, so if any changes are made to the commands, you do not need to restart. You do not need to call this command as it updates every time you run a command.",
+            "adminRequired": false,
+            "category": "utility",
+            "callback": () => {
+                this.commands.clear();
+                this.registerCommands();
+            }
+        });
     }
 }
 

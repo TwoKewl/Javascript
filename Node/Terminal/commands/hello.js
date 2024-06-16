@@ -4,6 +4,6 @@ module.exports = {
     "adminRequired": false,
     "category": "fun",
     "callback": function(args, context) {
-        console.log(`Hello, ${context.account.username}!`);
+        console.log(`Hello, ${context.account.username}! Welcome to the terminal!`);
     }
 }
