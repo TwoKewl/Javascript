@@ -53,7 +53,7 @@ class Hand {
     }
 
     tick(x, y) {
-        this.angle += this.speed / 1000;
+        this.angle += this.speed / 100;
 
         this.ex = x + this.length * Math.sin(this.angle);
         this.ey = y + this.length * Math.cos(this.angle);
@@ -65,14 +65,14 @@ class Hand {
 }
 
 const hands = [];
-hands.push(new Hand(200, -Math.PI / 4, 5));
-hands.push(new Hand(200, -Math.PI / 2, 18));
+hands.push(new Hand(200, -Math.PI / 4, 7)); // Ratio for first hand
+hands.push(new Hand(200, -Math.PI / 2, 13)); // Ratio for second hand
 const points = [];
 var frame = 0;
 
 function tick() {
     frame++;
-    if (frame > 6300) return;
+    if (frame > 630) return;
     hands.forEach((hand) => {
         if (hands.indexOf(hand) == 0) {
             hand.tick(canvas.width / 2, canvas.height / 2);
