@@ -44,7 +44,7 @@ function clearScreen(r, g, b) {
 }
 
 class DoublePendulum {
-    constructor(angle1, angle2) {
+    constructor(angle1, angle2, r, g, b) {
         this.g = 9.81;
         this.l1 = 150;
         this.l2 = 150;
@@ -57,6 +57,10 @@ class DoublePendulum {
         this.originX = canvas.width / 2;
         this.originY = canvas.height / 2;
         this.dt = 0.05;
+
+        this.red = r;
+        this.green = g;
+        this.blue = b;
     }
 
     update() {
@@ -87,15 +91,18 @@ class DoublePendulum {
         let x2 = x1 + this.l2 * Math.sin(this.a2);
         let y2 = y1 + this.l2 * Math.cos(this.a2);
 
-        line(this.originX, this.originY, x1, y1, 255, 255, 255, 1, 1);
-        line(x1, y1, x2, y2, 255, 255, 255, 1, 1);
+        line(this.originX, this.originY, x1, y1, this.red, this.green, this.blue, 1, 1);
+        line(x1, y1, x2, y2, this.red, this.green, this.blue, 1, 1);
     }
 }
 
 const doublePends = [];
-const numPends = 1000;
+const numPends = 500;
 for (let i = 0; i < numPends; i++) {
-    doublePends.push(new DoublePendulum(Math.PI / 2, Math.PI / 2 + i * 0.0000001));
+    const red = ((i + 1) * 255 / numPends);
+    const green = 255 - red / 2;
+    const blue = 0;
+    doublePends.push(new DoublePendulum(Math.PI / 2, Math.PI / 2 + i * 0.00001, red, green, blue));
 }
 
 function tick() {
@@ -114,4 +121,4 @@ doublePends.forEach(pend => {
     pend.render();
 });
 
-setTimeout(() => tick(), 2000);
+tick();
