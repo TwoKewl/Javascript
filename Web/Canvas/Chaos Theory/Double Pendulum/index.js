@@ -44,7 +44,7 @@ function clearScreen(r, g, b) {
 }
 
 class DoublePendulum {
-    constructor(angle1, angle2, r, g, b) {
+    constructor(angle1, angle2, hue) {
         this.g = 9.81;
         this.l1 = 150;
         this.l2 = 150;
@@ -58,9 +58,7 @@ class DoublePendulum {
         this.originY = canvas.height / 2;
         this.dt = 0.05;
 
-        this.red = r;
-        this.green = g;
-        this.blue = b;
+        this.hue = hue;
     }
 
     update() {
@@ -91,19 +89,44 @@ class DoublePendulum {
         let x2 = x1 + this.l2 * Math.sin(this.a2);
         let y2 = y1 + this.l2 * Math.cos(this.a2);
 
-        line(this.originX, this.originY, x1, y1, this.red, this.green, this.blue, 1, 1);
-        line(x1, y1, x2, y2, this.red, this.green, this.blue, 1, 1);
+        lineHSL(this.originX, this.originY, x1, y1, this.hue, 100, 50, 1);
+        lineHSL(x1, y1, x2, y2, this.hue, 100, 50, 1);
     }
 }
 
-const doublePends = [];
-const numPends = 500;
-for (let i = 0; i < numPends; i++) {
-    const red = ((i + 1) * 255 / numPends);
-    const green = 255 - red / 2;
-    const blue = 0;
-    doublePends.push(new DoublePendulum(Math.PI / 2, Math.PI / 2 + i * 0.00001, red, green, blue));
+function lineHSL(sx, sy, ex, ey, h, s, l, thickness) {
+    ctx.beginPath();
+    ctx.lineWidth = thickness;
+    ctx.moveTo(sx, sy);
+    ctx.lineTo(ex, ey);
+    ctx.strokeStyle = `hsl(${h}, ${s}%, ${l}%)`;
+    ctx.stroke();
 }
+
+const doublePends = [];
+const numPends = 1000000;
+for (let i = 0; i < numPends; i++) {
+    const hue = i * 360 / numPends;
+    doublePends.push(new DoublePendulum(Math.PI / 2, Math.PI / 2 + i * 0.00000001, hue));
+}
+
+function saveCanvasAsImage(fileName) {
+    var dataURL = canvas.toDataURL('image/png');
+    var link = document.createElement('a');
+    link.href = dataURL;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+function getFrameAsString(frame) {
+    return frame.toString().padStart(4, '0');
+}
+
+console.log(getFrameAsString(1));
+
+var frame = 0;
 
 function tick() {
     clearScreen(0, 0, 0);
@@ -113,7 +136,12 @@ function tick() {
         pend.render();
     });
 
-    requestAnimationFrame(tick);
+    saveCanvasAsImage(getFrameAsString(frame));
+    frame++;
+
+    if (frame < 9999) {
+        requestAnimationFrame(tick);
+    }
 }
 
 clearScreen(0, 0, 0);
