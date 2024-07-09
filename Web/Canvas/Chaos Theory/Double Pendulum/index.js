@@ -49,7 +49,7 @@ class DoublePendulum {
         this.l1 = 150;
         this.l2 = 150;
         this.m1 = 10;
-        this.m2 = 10;
+        this.m2 = 5;
         this.a1 = angle1;
         this.a2 = angle2;
         this.a1_v = 0;
@@ -107,7 +107,7 @@ const doublePends = [];
 const numPends = 1000000;
 for (let i = 0; i < numPends; i++) {
     const hue = i * 360 / numPends;
-    doublePends.push(new DoublePendulum(Math.PI / 2, Math.PI / 2 + i * 0.00000001, hue));
+    doublePends.push(new DoublePendulum(Math.PI, Math.PI / 8 * 7 + i * 0.000000001, hue));
 }
 
 function saveCanvasAsImage(fileName) {
@@ -123,8 +123,6 @@ function saveCanvasAsImage(fileName) {
 function getFrameAsString(frame) {
     return frame.toString().padStart(4, '0');
 }
-
-console.log(getFrameAsString(1));
 
 var frame = 0;
 
