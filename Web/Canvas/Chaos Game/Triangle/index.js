@@ -93,9 +93,16 @@ class Triangle {
         const weight2 = dist2 / total;
         const weight3 = dist3 / total;
 
-        const red = this.colours[0][0] * weight1 + this.colours[1][0] * weight2 + this.colours[2][0] * weight3;
-        const green = this.colours[0][1] * weight1 + this.colours[1][1] * weight2 + this.colours[2][1] * weight3;
-        const blue = this.colours[0][2] * weight1 + this.colours[1][2] * weight2 + this.colours[2][2] * weight3;
+        var red = this.colours[0][0] * weight1 + this.colours[1][0] * weight2 + this.colours[2][0] * weight3;
+        var green = this.colours[0][1] * weight1 + this.colours[1][1] * weight2 + this.colours[2][1] * weight3;
+        var blue = this.colours[0][2] * weight1 + this.colours[1][2] * weight2 + this.colours[2][2] * weight3;
+
+        const max = Math.max(red, green, blue);
+        const multiplier = 255 / max;
+
+        red *= multiplier;
+        green *= multiplier;
+        blue *= multiplier;
 
         return [red, green, blue];
     }
@@ -107,12 +114,14 @@ var x = point[0];
 var y = point[1];
 
 function tick() {
-    const corner = t.getRandomCorner();
-    x = (x + corner[0]) / 2;
-    y = (y + corner[1]) / 2;
-    const colour = t.getRGBColour(x, y);
-
-    circle(x, y, 1, colour[0], colour[1], colour[2], 1);
+    for (let i = 0; i < 100; i++) {
+        const corner = t.getRandomCorner();
+        x = (x + corner[0]) / 2;
+        y = (y + corner[1]) / 2;
+        const colour = t.getRGBColour(x, y);
+    
+        circle(x, y, 1, colour[0], colour[1], colour[2], 1);
+    }
     
     requestAnimationFrame(tick);
 }
