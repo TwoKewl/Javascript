@@ -36,7 +36,7 @@ function clearScreen(r, g, b) {
 class Torus {
     constructor() {
         this.divisions = 25;
-        this.tubeDivisions = 100;
+        this.tubeDivisions = 32;
         this.radius = 200;
         this.tubeRadius = 50;
         this.points = [];
@@ -49,7 +49,7 @@ class Torus {
 
         this.rotationX = 0;
         this.rotationY = 0;
-        this.rotationZ = 0;
+        this.rotationZ = Math.PI / 2;
 
         this.wKey = false;
         this.sKey = false;
@@ -156,15 +156,34 @@ class Torus {
     }
 }
 
+function saveCanvasAsImage(fileName) {
+    var dataURL = canvas.toDataURL('image/png');
+    var link = document.createElement('a');
+    link.href = dataURL;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+function getFrameAsString(frame) {
+    return frame.toString().padStart(4, '0');
+}
+
 const torus = new Torus();
 torus.getPoints();
+var frame = 0;
 
 function tick() {
     clearScreen(0, 0, 0);
     torus.updateRotation({x: 0.01, y: 0.01, z: 0.01});
     torus.updatePoints();
     torus.render();
-    requestAnimationFrame(tick);
+
+    saveCanvasAsImage(`${getFrameAsString(frame)}.png`);
+    frame++;
+
+    if (frame < 5000) setTimeout(() => requestAnimationFrame(tick), 100);
 } tick();
 
 document.addEventListener('keydown', (e) => {
