@@ -1,13 +1,13 @@
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+canvas.width = window.screen.width;
+canvas.height = window.screen.height;
 document.body.classList.add("remove-scrolling");
 
-let xMin = -12.5, xMax = 5, yMin = -5, yMax = 5;
+let xMin = -2.5, xMax = 1, yMin = -1, yMax = 1;
 const maxIterations = 100;
-const zoomFactor = 1.01;
+const zoomFactor = 5;
 const zoomCenter = { x: -0.9493185084853583, y: -0.25015574495841725 };
 
 function clearScreen(r, g, b) {
@@ -108,6 +108,8 @@ function zoomIn(centerX, centerY) {
     const newWidth = (xMax - xMin) / zoomFactor;
     const newHeight = (yMax - yMin) / zoomFactor;
 
+    console.log(centerX, centerY);
+
     xMin = centerX - newWidth / 2;
     xMax = centerX + newWidth / 2;
     yMin = centerY - newHeight / 2;
@@ -142,7 +144,14 @@ function animate() {
 
 function main() {
     clearScreen(0, 0, 0);
-    animate();
+    // animate();
 }
 
-main();
+canvas.addEventListener('click', (event) => {
+    const x = xMin + event.offsetX / canvas.width * (xMax - xMin);
+    const y = yMin + event.offsetY / canvas.height * (yMax - yMin);
+    zoomIn(x, y);
+    render();
+});
+
+render();
