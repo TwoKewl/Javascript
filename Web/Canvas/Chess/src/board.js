@@ -1,257 +1,147 @@
-import * as piece from './piece.js';
-import { Renderer } from './renderer.js';
+import * as Piece from './piece.js';
 
 export class Board {
-    constructor(loadString) {
-        this.renderer = new Renderer();
-        this.board = this.loadBoard(loadString);
-        this.renderer.init(this.board);
-
-        this.pieces = [];
+    constructor(ctx) {
+        this.ctx = ctx;
+        this.board = new Array(8).fill(null).map(() => new Array(8).fill(null));
+        this.setBoard();
+        this.images = new Map();
     }
 
-    loadBoard(input) {
-        var board = [];
-        var row = [];
-        var x = 0;
-        var y = 0;
+    setBoard() {
+        this.board[4][5] = new Piece.Rook(this.ctx, 4, 5, 'black');
+        this.board[5][6] = new Piece.Pawn(this.ctx, 5, 6, 'white')
+    }
 
-        if (input[input.length - 1] != "/") {
-            input += '/';
+    defaultBoard() {
+        for (let x = 0; x < 8; x++) {
+            this.board[x][1] = new Piece.Pawn(this.ctx, x, 1, 'black');
+            this.board[x][6] = new Piece.Pawn(this.ctx, x, 6, 'white');
         }
 
-        input.split('').forEach((char) => {
-            if (char == '/') {
-                for (let i = x; i < 8; i++) {
-                    row.push(0);
-                }
+        this.board[0][0] = new Piece.Rook(this.ctx, 0, 0, 'black');
+        this.board[7][0] = new Piece.Rook(this.ctx, 7, 0, 'black');
+        this.board[0][7] = new Piece.Rook(this.ctx, 0, 7, 'white');
+        this.board[7][7] = new Piece.Rook(this.ctx, 7, 7, 'white');
 
-                x = 0;
-                y++;
+        this.board[1][0] = new Piece.Knight(this.ctx, 1, 0, 'black');
+        this.board[6][0] = new Piece.Knight(this.ctx, 6, 0, 'black');
+        this.board[1][7] = new Piece.Knight(this.ctx, 1, 7, 'white');
+        this.board[6][7] = new Piece.Knight(this.ctx, 6, 7, 'white');
 
-                board.push(row);
-                row = [];
-            } else if (!isNaN(char)) {
-                for (let i = 0; i < parseInt(char); i++) row.push(0);
-                x += parseInt(char);
-            } else {
-                switch (char) {
-                    case "p":
-                        row.push(new piece.Pawn(x, y, 0));
-                        break;
-                    case "P":
-                        row.push(new piece.Pawn(x, y, 1));
-                        break;
-                    case "n":
-                        row.push(new piece.Knight(x, y, 0));
-                        break;
-                    case "N":
-                        row.push(new piece.Knight(x, y, 1));
-                        break;
-                    case "b":
-                        row.push(new piece.Bishop(x, y, 0));
-                        break;
-                    case "B":
-                        row.push(new piece.Bishop(x, y, 1));
-                        break;
-                    case "r":
-                        row.push(new piece.Rook(x, y, 0));
-                        break;
-                    case "R":
-                        row.push(new piece.Rook(x, y, 1));
-                        break;
-                    case "q":
-                        row.push(new piece.Queen(x, y, 0));
-                        break;
-                    case "Q":
-                        row.push(new piece.Queen(x, y, 1));
-                        break;
-                    case "k":
-                        row.push(new piece.King(x, y, 0));
-                        break;
-                    case "K":
-                        row.push(new piece.King(x, y, 1));
-                        break;
-                    default:
-                        row.push(0);
-                }
+        this.board[2][0] = new Piece.Bishop(this.ctx, 2, 0, 'black');
+        this.board[5][0] = new Piece.Bishop(this.ctx, 5, 0, 'black');
+        this.board[2][7] = new Piece.Bishop(this.ctx, 2, 7, 'white');
+        this.board[5][7] = new Piece.Bishop(this.ctx, 5, 7, 'white');
 
-                x++;
+        this.board[3][0] = new Piece.Queen(this.ctx, 3, 0, 'black');
+        this.board[4][0] = new Piece.King(this.ctx, 4, 0, 'black');
+        this.board[3][7] = new Piece.Queen(this.ctx, 3, 7, 'white');
+        this.board[4][7] = new Piece.King(this.ctx, 4, 7, 'white');
+    }
+
+    renderBoard() {
+        for (let x = 0; x < 8; x++) {
+            for (let y = 0; y < 8; y++) {
+                this.ctx.fillStyle = (x + y) % 2 === 0 ? '#f0d9b5' : '#b58863';
+                this.ctx.fillRect(x * 100, y * 100, 100, 100);
             }
-
-        });
-
-        board.forEach(row => {
-            row.forEach(piece => {
-                if (piece != 0) {
-                    piece.setBoard(board);
-                }
-            });
-        });
-
-        return board;
-    }
-    
-    setBoardForAllPieces() {
-        this.board.forEach(row => {
-            row.forEach(piece => {
-                if (piece != 0) {
-                    piece.setBoard(this.board);
-                }
-            });
-        });
-    }
-
-    checkCheckmate(colour) {
-        var check = this.isInCheck(colour);
-
-        if (check) {
-
         }
     }
 
-    isInCheck(colour) {
-        if (!this.copy) {
-            var row = this.board.find((row) => row.find((piece) => piece.type == 'King' && piece.colour == colour));
-            if (row) {
-                var king = row.find((piece) => piece.type == 'King' && piece.colour == colour);
-                if (king) {
-                    var kingLocation = [king.x, king.y];
-
-                    var moves = this.getAllMoves(colour);
-
-                    for (const move of moves) {
-                        if (move[1][0] == kingLocation[0] && move[1][1] == kingLocation[1]) {
-                            console.log(`Check for ${colour == 0 ? 'Black' : 'White'} at (${move[1][0]}, ${move[1][1]})`);
-                            return true;
-                        }
-                    }
+    renderPieces() {
+        for (let x = 0; x < 8; x++) {
+            for (let y = 0; y < 8; y++) {
+                const piece = this.getPieceAt(x, y);
+                if (piece) {
+                    const image = this.images.get(piece.imageName);
+                    this.ctx.drawImage(image, x * 100, y * 100, 100, 100);
                 }
-            }  
+            }
         }
-
-        return false;
     }
 
-    getAllMoves(colour) {
-        var moves = [];
+    playMoveSound() {
+        const audio = new Audio('../assets/sounds/move.mp3');
+        audio.play();
+    }
 
-        this.board.forEach(row => {
-            row.forEach(piece => {
-                if (piece != 0 && piece.colour == colour) {
-                    moves.push(...piece.getMoves());
+    loadPieces() {
+        const imagePath = '../assets/pieces/';
+        const filenames = [
+            'Black Pawn.png', 'White Pawn.png',
+            'Black Rook.png', 'White Rook.png',
+            'Black Knight.png', 'White Knight.png',
+            'Black Bishop.png', 'White Bishop.png',
+            'Black Queen.png', 'White Queen.png',
+            'Black King.png', 'White King.png'
+        ];
+        const imageCount = filenames.length;
+        this.images = new Map();
+
+        filenames.forEach((filename) => {
+            const img = new Image();
+            img.src = imagePath + filename;
+            img.onload = () => {
+                this.images.set(filename, img);
+                if (this.images.size === imageCount) {
+                    this.renderBoard();
+                    this.renderPieces();
                 }
+            };
+        });
+    }
+
+    getPieceAt(x, y) {
+        return this.board[x][y];
+    }
+
+    makeRandomMove() {
+        const moves = this.getAllLegalMoves();
+        const move = moves[Math.floor(Math.random() * moves.length)];
+        if (move) {
+            const [piece, [x, y]] = move;
+            this.makeMove(piece, x, y);
+        } else {
+            console.log('No legal moves available');
+        }
+    }
+
+    getAllLegalMoves() {
+        const pieces = this.board.flat().filter((p) => p !== null && (p instanceof Piece.Pawn || p instanceof Piece.Knight || p instanceof Piece.Rook));
+        const moves = [];
+
+        pieces.forEach((piece) => {
+            const legalMoves = piece.getLegalMoves(this.board);
+            legalMoves.forEach((move) => {
+                moves.push([piece, move]);
             });
         });
 
         return moves;
     }
 
-    makeMove(x, y, nx, ny) {
-        var piece = this.board[y][x];
-        if (piece) {
-            this.board[y][x] = 0;
-            this.board[ny][nx] = piece;
-            piece.x = nx;
-            piece.y = ny;
+    makeMove(piece, x, y) {
+        if (this.checkIfMoveIsValid(piece, x, y)) {
+            this.board[piece.x][piece.y] = null;
+            this.board[x][y] = piece;
+            piece.moveTo(x, y);
 
-            if (piece.type == "Pawn" && (ny == 0 || ny == 7)) {
-                console.log("PROMOTION");
-                this.handlePawnPromotion(nx, ny);
-            }
-            
-            var moves = [...this.getAllMoves(0), ...this.getAllMoves(1)];
-            this.renderer.onPieceMove(this.board, moves);
-
-            this.checkCheckmate();
+            this.renderBoard();
+            this.renderPieces();
+            this.playMoveSound();
         }
     }
 
-    handlePawnPromotion(x, y) {
-        var pieceOnBoard = this.board[y][x];
-
-        console.log(pieceOnBoard);
-
-        if (pieceOnBoard) {
-            console.log(`Pawn at ${x}, ${y} is being promoted`);
-            this.board[y][x] = new piece.Queen(x, y, pieceOnBoard.colour);
-            this.setBoardForAllPieces();
-        }
-    }
-}
-
-class BoardCopy {
-    constructor(board) {
-        this.board = board;   
+    checkIfMoveIsValid(piece, x, y) {
+        return true;
     }
 
-    isInCheck(colour) {
-        if (!this.copy) {
-            var row = this.board.find((row) => row.find((piece) => piece.type == 'King' && piece.colour == colour));
-            if (row) {
-                var king = row.find((piece) => piece.type == 'King' && piece.colour == colour);
-                if (king) {
-                    var kingLocation = [king.x, king.y];
-
-                    var moves = this.getAllMoves(colour);
-
-                    for (const move of moves) {
-                        if (move[1][0] == kingLocation[0] && move[1][1] == kingLocation[1]) {
-                            console.log(`Check for ${colour == 0 ? 'Black' : 'White'} at (${move[1][0]}, ${move[1][1]})`);
-                            return true;
-                        }
-                    }
-                }
-            }  
-        }
-
-        return false;
-    }
-
-    makeMove(x, y, nx, ny) {
-        var piece = this.board[y][x];
-        if (piece) {
-            this.board[y][x] = 0;
-            this.board[ny][nx] = piece;
-            piece.x = nx;
-            piece.y = ny;
-
-            if (piece.type == "Pawn" && (ny == 0 || ny == 7)) {
-                this.handlePawnPromotion(nx, ny);
-            }
-        }
-    }
-
-    handlePawnPromotion(x, y) {
-        var pieceOnBoard = this.board[y][x];
-
-        if (pieceOnBoard) {
-            this.board[y][x] = new piece.Queen(x, y, pieceOnBoard.colour);
-            this.setBoardForAllPieces();
-        }   
-    }
-
-    setBoardForAllPieces() {
-        this.board.forEach(row => {
-            row.forEach(piece => {
-                if (piece != 0) {
-                    piece.setBoard(this.board);
-                }
-            });
+    renderLegalMoves(piece) {
+        const legalMoves = piece.getLegalMoves(this.board);
+        this.ctx.fillStyle = 'rgba(0, 255, 0, 0.5)';
+        legalMoves.forEach(([x, y]) => {
+            this.ctx.fillRect(x * 100, y * 100, 100, 100);
         });
-    }
-
-    getAllMoves(colour) {
-        var moves = [];
-
-        this.board.forEach(row => {
-            row.forEach(piece => {
-                if (piece != 0 && piece.colour == colour) {
-                    moves.push(...piece.getMoves());
-                }
-            });
-        });
-
-        return moves;
     }
 }

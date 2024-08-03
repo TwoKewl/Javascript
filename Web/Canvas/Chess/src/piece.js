@@ -1,60 +1,106 @@
-import * as draw from './drawing.js';
+
+const capitaliseFirstLetter = (string) => {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+};
 
 export class Pawn {
-    constructor(x, y, colour) {
+    constructor(ctx, x, y, color) {
+        this.ctx = ctx;
         this.x = x;
         this.y = y;
-        this.colour = colour;
-        this.type = "Pawn";
-        this.enPassant = true;
+        this.color = color;
+        this.imageName = `${capitaliseFirstLetter(color)} Pawn.png`
     }
 
-    setBoard(board) {
-        this.board = board;
+    moveTo(x, y) {
+        this.x = x;
+        this.y = y;
     }
 
-    getMoves() {
-        var moves = [];
+    getLegalMoves(board) {
+        const moves = [];
+        const dy = this.color === 'white' ? -1 : 1;
 
-        if (this.colour == 0) { // Black Pieces
-            if (this.board[this.y + 1] && this.board[this.y + 1][this.x] == 0) { // If one square forward is empty
-                moves.push([[this.x, this.y], [this.x, this.y + 1]]);
+        if (this.y + dy < 0 || this.y + dy > 7) {
+            return moves;
+        }
 
-                if (this.board[this.y + 2] && this.board[this.y + 2][this.x] == 0 && this.y == 1) { // If two squares forward is empty
-                    moves.push([[this.x, this.y], [this.x, this.y + 2]]);
-                }
-
-                if (this.x > 0) {
-                    if (this.board[this.y + 1][this.x - 1] != 0 && this.board[this.y + 1][this.x - 1].colour != this.colour) { // If one square forward and one square left is not empty
-                        moves.push([[this.x, this.y], [this.x - 1, this.y + 1]]);
-                    }
-                }
-                if (this.x < 7) {
-                    if (this.board[this.y + 1][this.x + 1] != 0 && this.board[this.y + 1][this.x + 1].colour != this.colour) { // If one square forward and one square right is not empty
-                        moves.push([[this.x, this.y], [this.x + 1, this.y + 1]]);
-                    }
-                }               
+        if (board[this.x][this.y + dy] === null) {
+            moves.push([this.x, this.y + dy]);
+            if (board[this.x][this.y + dy * 2] === null && this.color === 'white' ? this.y === 6 : this.y === 1) {
+                moves.push([this.x, this.y + dy * 2]);
             }
-        } else { // White Pieces
-            if (this.board[this.y - 1]) { // If one square forward is empty
-                if (this.board[this.y - 1][this.x] == 0) {
-                    moves.push([[this.x, this.y], [this.x, this.y - 1]]);
+        }
 
-                    if (this.board[this.y - 2] && this.board[this.y - 2][this.x] == 0 && this.y == 6) { // If two squares forward is empty
-                        moves.push([[this.x, this.y], [this.x, this.y - 2]]);
-                    }
-                }
+        if (this.x - 1 >= 0 && (board[this.x - 1][this.y + dy] !== null && board[this.x - 1][this.y + dy].color !== this.color)) {
+            moves.push([this.x - 1, this.y + dy]);
+        }
+        if (this.x + 1 < 8 && (board[this.x + 1][this.y + dy] !== null && board[this.x + 1][this.y + dy].color !== this.color)) {
+            moves.push([this.x + 1, this.y + dy]);
+        }
 
-                if (this.x > 0) {
-                    if (this.board[this.y - 1][this.x - 1] != 0 && this.board[this.y - 1][this.x - 1].colour != this.colour) { // If one square forward and one square left is not empty
-                        moves.push([[this.x, this.y], [this.x - 1, this.y - 1]]);
-                    }
+        return moves;
+    }
+}
+
+export class Rook {
+    constructor(ctx, x, y, color) {
+        this.ctx = ctx;
+        this.x = x;
+        this.y = y;
+        this.color = color;
+        this.imageName = `${capitaliseFirstLetter(color)} Rook.png`
+    }
+
+    moveTo(x, y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    getLegalMoves(board) {
+        const moves = [];
+
+        for (let i = this.x + 1; i < 8; i++) {
+            if (board[i][this.y] === null) {
+                moves.push([i, this.y]);
+            } else {
+                if (board[i][this.y].color !== this.color) {
+                    moves.push([i, this.y]);
                 }
-                if (this.x < 7) {
-                    if (this.board[this.y - 1][this.x + 1] != 0 && this.board[this.y - 1][this.x + 1].colour != this.colour) { // If one square forward and one square right is not empty
-                        moves.push([[this.x, this.y], [this.x + 1, this.y - 1]]);
-                    }
+                break;
+            }
+        }
+
+        for (let i = this.x - 1; i >= 0; i--) {
+            if (board[i][this.y] === null) {
+                moves.push([i, this.y]);
+            } else {
+                if (board[i][this.y].color !== this.color) {
+                    moves.push([i, this.y]);
                 }
+                break;
+            }
+        }
+
+        for (let i = this.y + 1; i < 8; i++) {
+            if (board[this.x][i] === null) {
+                moves.push([this.x, i]);
+            } else {
+                if (board[this.x][i].color !== this.color) {
+                    moves.push([this.x, i]);
+                }
+                break;
+            }
+        }
+
+        for (let i = this.y - 1; i >= 0; i--) {
+            if (board[this.x][i] === null) {
+                moves.push([this.x, i]);
+            } else {
+                if (board[this.x][i].color !== this.color) {
+                    moves.push([this.x, i]);
+                }
+                break;
             }
         }
 
@@ -63,66 +109,29 @@ export class Pawn {
 }
 
 export class Knight {
-    constructor(x, y, colour) {
+    constructor(ctx, x, y, color) {
+        this.ctx = ctx;
         this.x = x;
         this.y = y;
-        this.colour = colour;
-        this.type = "Knight";
+        this.color = color;
+        this.imageName = `${capitaliseFirstLetter(color)} Knight.png`
     }
 
-    setBoard(board) {
-        this.board = board;
+    moveTo(x, y) {
+        this.x = x;
+        this.y = y;
     }
 
-    getMoves() {
-        var moves = [];
+    getLegalMoves(board) {
+        const moves = [];
+        const delta = [[-2, -1], [-2, 1], [-1, -2], [-1, 2], [1, -2], [1, 2], [2, -1], [2, 1]]
 
-        if (this.board[this.y + 2]) {
-            if (this.x + 1 < 8) {
-                if ((this.board[this.y + 2][this.x + 1] != 0 && this.board[this.y + 2][this.x + 1].colour != this.colour) || this.board[this.y + 2][this.x + 1] == 0) {
-                    moves.push([[this.x, this.y], [this.x + 1, this.y + 2]]);
-                }
-            }
-            if (this.x - 1 >= 0) {
-                if ((this.board[this.y + 2][this.x - 1] != 0 && this.board[this.y + 2][this.x - 1].colour != this.colour) || this.board[this.y + 2][this.x - 1] == 0) {
-                    moves.push([[this.x, this.y], [this.x - 1, this.y + 2]]);
-                }
-            }
-        }
-        if (this.board[this.y - 2]) {
-            if (this.x + 1 < 8) {
-                if ((this.board[this.y - 2][this.x + 1] != 0 && this.board[this.y - 2][this.x + 1].colour != this.colour) || this.board[this.y - 2][this.x + 1] == 0) {
-                    moves.push([[this.x, this.y], [this.x + 1, this.y - 2]]);
-                }
-            }
-            if (this.x - 1 >= 0) {
-                if ((this.board[this.y - 2][this.x - 1] != 0 && this.board[this.y - 2][this.x - 1].colour != this.colour) || this.board[this.y - 2][this.x - 1] == 0) {
-                    moves.push([[this.x, this.y], [this.x - 1, this.y - 2]]);
-                }
-            }
-        }
-        if (this.board[this.y + 1]) {
-            if (this.x + 2 < 8) {
-                if ((this.board[this.y + 1][this.x + 2] != 0 && this.board[this.y + 1][this.x + 2].colour != this.colour) || this.board[this.y + 1][this.x + 2] == 0) {
-                    moves.push([[this.x, this.y], [this.x + 2, this.y + 1]]);
-                }
-            }
-            if (this.x - 2 >= 0) {
-                if ((this.board[this.y + 1][this.x - 2] != 0 && this.board[this.y + 1][this.x - 2].colour != this.colour) || this.board[this.y + 1][this.x - 2] == 0) {
-                    moves.push([[this.x, this.y], [this.x - 2, this.y + 1]]);
-                }
-            }
-        }
-        if (this.board[this.y - 1]) {
-            if (this.x + 2 < 8) {
-                if ((this.board[this.y - 1][this.x + 2] != 0 && this.board[this.y - 1][this.x + 2].colour != this.colour) || this.board[this.y - 1][this.x + 2] == 0) {
-                    moves.push([[this.x, this.y], [this.x + 2, this.y - 1]]);
-                }
-            }
-            if (this.x - 2 >= 0) {
-                if ((this.board[this.y - 1][this.x - 2] != 0 && this.board[this.y - 1][this.x - 2].colour != this.colour) || this.board[this.y - 1][this.x - 2] == 0) {
-                    moves.push([[this.x, this.y], [this.x - 2, this.y - 1]]);
-                }
+        for (const [dx, dy] of delta) {
+            const newX = this.x + dx;
+            const newY = this.y + dy;
+
+            if (newX >= 0 && newX < 8 && newY >= 0 && newY < 8 && (board[newX][newY] === null || board[newX][newY].color !== this.color)) {
+                moves.push([newX, newY]);
             }
         }
 
@@ -131,289 +140,46 @@ export class Knight {
 }
 
 export class Bishop {
-    constructor(x, y, colour) {
+    constructor(ctx, x, y, color) {
+        this.ctx = ctx;
         this.x = x;
         this.y = y;
-        this.colour = colour;
-        this.type = "Bishop";
+        this.color = color;
+        this.imageName = `${capitaliseFirstLetter(color)} Bishop.png`
     }
 
-    setBoard(board) {
-        this.board = board;
-    }
-
-    getMoves() {
-        var moves = [];
-
-        for (let i = 1; i < 8; i++) {
-            if (this.y + i < 8 && this.x + i < 8) {
-                if (this.board[this.y + i][this.x + i] == 0) {
-                    moves.push([[this.x, this.y], [this.x + i, this.y + i]]);
-                } else if (this.board[this.y + i][this.x + i].colour != this.colour) {
-                    moves.push([[this.x, this.y], [this.x + i, this.y + i]]);
-                    break;
-                } else {
-                    break;
-                }
-            }
-        }
-        for (let i = 1; i < 8; i++) {
-            if (this.y + i < 8 && this.x - i >= 0) {
-                if (this.board[this.y + i][this.x - i] == 0) {
-                    moves.push([[this.x, this.y], [this.x - i, this.y + i]]);
-                } else if (this.board[this.y + i][this.x - i].colour != this.colour) {
-                    moves.push([[this.x, this.y], [this.x - i, this.y + i]]);
-                    break;
-                } else {
-                    break;
-                }
-            }
-        }
-        for (let i = 1; i < 8; i++) {
-            if (this.y - i >= 0 && this.x + i < 8) {
-                if (this.board[this.y - i][this.x + i] == 0) {
-                    moves.push([[this.x, this.y], [this.x + i, this.y - i]]);
-                } else if (this.board[this.y - i][this.x + i].colour != this.colour) {
-                    moves.push([[this.x, this.y], [this.x + i, this.y - i]]);
-                    break;
-                } else {
-                    break;
-                }
-            }
-        }
-        for (let i = 1; i < 8; i++) {
-            if (this.y - i >= 0 && this.x - i >= 0) {
-                if (this.board[this.y - i][this.x - i] == 0) {
-                    moves.push([[this.x, this.y], [this.x - i, this.y - i]]);
-                } else if (this.board[this.y - i][this.x - i].colour != this.colour) {
-                    moves.push([[this.x, this.y], [this.x - i, this.y - i]]);
-                    break;
-                } else {
-                    break;
-                }
-            }
-        }
-
-        return moves;
-    }
-}
-
-export class Rook {
-    constructor(x, y, colour) {
+    moveTo(x, y) {
         this.x = x;
         this.y = y;
-        this.colour = colour;
-        this.type = "Rook";
-    }
-    
-    setBoard(board) {
-        this.board = board;
-    }
-
-    getMoves() {
-        var moves = [];
-
-        for (let i = 1; i < 8; i++) {
-            if (this.y + i <= 7) {
-                if (this.board[this.y + i][this.x] == 0) {
-                    moves.push([[this.x, this.y], [this.x, this.y + i]]);
-                } else if (this.board[this.y + i][this.x].colour != this.colour) {
-                    moves.push([[this.x, this.y], [this.x, this.y + i]]);
-                    break;
-                } else break;
-            } else break;
-        }
-        for (let i = 1; i < 8; i++) {
-            if (this.y - i >= 0) {
-                if (this.board[this.y - i][this.x] == 0) {
-                    moves.push([[this.x, this.y], [this.x, this.y - i]]);
-                } else if (this.board[this.y - i][this.x].colour != this.colour) {
-                    moves.push([[this.x, this.y], [this.x, this.y - i]]);
-                    break;
-                } else break;
-            } else break;
-        }
-        for (let i = 1; i < 8; i++) {
-            if (this.x + i <= 7) {
-                if (this.board[this.y][this.x + i] == 0) {
-                    moves.push([[this.x, this.y], [this.x + i, this.y]]);
-                } else if (this.board[this.y][this.x + i].colour != this.colour) {
-                    moves.push([[this.x, this.y], [this.x + i, this.y]]);
-                    break;
-                } else break;
-            } else break;
-        }
-        for (let i = 1; i < 8; i++) {
-            if (this.x - i >= 0) {
-                if (this.board[this.y][this.x - i] == 0) {
-                    moves.push([[this.x, this.y], [this.x - i, this.y]]);
-                } else if (this.board[this.y][this.x - i].colour != this.colour) {
-                    moves.push([[this.x, this.y], [this.x - i, this.y]]);
-                    break;
-                } else break;
-            } else break;
-        }
-
-        return moves;
     }
 }
 
 export class Queen {
-    constructor(x, y, colour) {
+    constructor(ctx, x, y, color) {
+        this.ctx = ctx;
         this.x = x;
         this.y = y;
-        this.colour = colour;
-        this.type = "Queen";
-    }
-    
-    setBoard(board) {
-        this.board = board;
+        this.color = color;
+        this.imageName = `${capitaliseFirstLetter(color)} Queen.png`
     }
 
-    getMoves() {
-        var moves = [];
-
-        for (let i = 1; i < 8; i++) {
-            if (this.y + i <= 7) {
-                if (this.board[this.y + i][this.x] == 0) {
-                    moves.push([[this.x, this.y], [this.x, this.y + i]]);
-                } else if (this.board[this.y + i][this.x].colour != this.colour) {
-                    moves.push([[this.x, this.y], [this.x, this.y + i]]);
-                    break;
-                } else break;
-            } else break;
-        }
-        for (let i = 1; i < 8; i++) {
-            if (this.y - i >= 0) {
-                if (this.board[this.y - i][this.x] == 0) {
-                    moves.push([[this.x, this.y], [this.x, this.y - i]]);
-                } else if (this.board[this.y - i][this.x].colour != this.colour) {
-                    moves.push([[this.x, this.y], [this.x, this.y - i]]);
-                    break;
-                } else break;
-            } else break;
-        }
-        for (let i = 1; i < 8; i++) {
-            if (this.x + i <= 7) {
-                if (this.board[this.y][this.x + i] == 0) {
-                    moves.push([[this.x, this.y], [this.x + i, this.y]]);
-                } else if (this.board[this.y][this.x + i].colour != this.colour) {
-                    moves.push([[this.x, this.y], [this.x + i, this.y]]);
-                    break;
-                } else break;
-            } else break;
-        }
-        for (let i = 1; i < 8; i++) {
-            if (this.x - i >= 0) {
-                if (this.board[this.y][this.x - i] == 0) {
-                    moves.push([[this.x, this.y], [this.x - i, this.y]]);
-                } else if (this.board[this.y][this.x - i].colour != this.colour) {
-                    moves.push([[this.x, this.y], [this.x - i, this.y]]);
-                    break;
-                } else break;
-            } else break;
-        }
-        for (let i = 1; i < 8; i++) {
-            if (this.y + i <= 7 && this.x + i <= 7) {
-                if (this.board[this.y + i][this.x + i] == 0) {
-                    moves.push([[this.x, this.y], [this.x + i, this.y + i]]);
-                } else if (this.board[this.y + i][this.x + i].colour != this.colour) {
-                    moves.push([[this.x, this.y], [this.x + i, this.y + i]]);
-                    break;
-                } else break;
-            } else break;
-        }
-        for (let i = 1; i < 8; i++) {
-            if (this.y + i <= 7 && this.x - i >= 0) {
-                if (this.board[this.y + i][this.x - i] == 0) {
-                    moves.push([[this.x, this.y], [this.x - i, this.y + i]]);
-                } else if (this.board[this.y + i][this.x - i].colour != this.colour) {
-                    moves.push([[this.x, this.y], [this.x - i, this.y + i]]);
-                    break;
-                } else break;
-            } else break;
-        }
-        for (let i = 1; i < 8; i++) {
-            if (this.y - i >= 0 && this.x + i <= 7) {
-                if (this.board[this.y - i][this.x + i] == 0) {
-                    moves.push([[this.x, this.y], [this.x + i, this.y - i]]);
-                } else if (this.board[this.y - i][this.x + i].colour != this.colour) {
-                    moves.push([[this.x, this.y], [this.x + i, this.y - i]]);
-                    break;
-                } else break;
-            } else break;
-        }
-        for (let i = 1; i < 8; i++) {
-            if (this.y - i >= 0 && this.x - i >= 0) {
-                if (this.board[this.y - i][this.x - i] == 0) {
-                    moves.push([[this.x, this.y], [this.x - i, this.y - i]]);
-                } else if (this.board[this.y - i][this.x - i].colour != this.colour) {
-                    moves.push([[this.x, this.y], [this.x - i, this.y - i]]);
-                    break;
-                } else break;
-            } else break;
-        }
-
-        return moves;
+    moveTo(x, y) {
+        this.x = x;
+        this.y = y;
     }
 }
 
 export class King {
-    constructor(x, y, colour) {
+    constructor(ctx, x, y, color) {
+        this.ctx = ctx;
         this.x = x;
         this.y = y;
-        this.colour = colour;
-        this.type = "King";
-    }
-    
-    setBoard(board) {
-        this.board = board;
+        this.color = color;
+        this.imageName = `${capitaliseFirstLetter(color)} King.png`
     }
 
-    getMoves() {
-        var moves = [];
-
-        if (this.y - 1 >= 0 && this.x + 1 < 8) {
-            if (this.board[this.y - 1][this.x + 1] == 0 || this.board[this.y - 1][this.x + 1].colour != this.colour) {
-                moves.push([[this.x, this.y], [this.x + 1, this.y - 1]]);
-            }
-        }
-        if (this.y - 1 >= 0) {
-            if (this.board[this.y - 1][this.x] == 0 || this.board[this.y - 1][this.x].colour != this.colour) {
-                moves.push([[this.x, this.y], [this.x, this.y - 1]]);
-            }
-        }
-        if (this.y - 1 >= 0 && this.x - 1 >= 0) {
-            if (this.board[this.y - 1][this.x - 1] == 0 || this.board[this.y - 1][this.x - 1].colour != this.colour) {
-                moves.push([[this.x, this.y], [this.x - 1, this.y - 1]]);
-            }
-        }
-        if (this.x + 1 < 8) {
-            if (this.board[this.y][this.x + 1] == 0 || this.board[this.y][this.x + 1].colour != this.colour) {
-                moves.push([[this.x, this.y], [this.x + 1, this.y]]);
-            }
-        }
-        if (this.x - 1 >= 0) {
-            if (this.board[this.y][this.x - 1] == 0 || this.board[this.y][this.x - 1].colour != this.colour) {
-                moves.push([[this.x, this.y], [this.x - 1, this.y]]);
-            }
-        }
-        if (this.y + 1 < 8 && this.x + 1 < 8) {
-            if (this.board[this.y + 1][this.x + 1] == 0 || this.board[this.y + 1][this.x + 1].colour != this.colour) {
-                moves.push([[this.x, this.y], [this.x + 1, this.y + 1]]);
-            }
-        }
-        if (this.y + 1 < 8) {
-            if (this.board[this.y + 1][this.x] == 0 || this.board[this.y + 1][this.x].colour != this.colour) {
-                moves.push([[this.x, this.y], [this.x, this.y + 1]]);
-            }
-        }
-        if (this.y + 1 < 8 && this.x - 1 >= 0) {
-            if (this.board[this.y + 1][this.x - 1] == 0 || this.board[this.y + 1][this.x - 1].colour != this.colour) {
-                moves.push([[this.x, this.y], [this.x - 1, this.y + 1]]);
-            }
-        }
-
-        return moves;
+    moveTo(x, y) {
+        this.x = x;
+        this.y = y;
     }
 }
