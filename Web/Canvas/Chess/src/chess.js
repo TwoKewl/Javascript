@@ -1,18 +1,38 @@
-const canvas = document.getElementById('chessBoard');
+const canvas = document.getElementById('chessboard');
 const ctx = canvas.getContext('2d');
-
 import { Board } from "./board.js";
 
-const b = new Board(ctx);
-b.loadPieces();
+const board = new Board(ctx, canvas.width, canvas.height);
+var selectedPiece = null;
+var moves = [];
+var isWhiteTurn = true;
 
 canvas.addEventListener('click', (e) => {
-    b.renderBoard();
-    b.renderPieces();
+    const x = Math.floor(e.offsetX / (canvas.width / 8));
+    const y = Math.floor(e.offsetY / (canvas.height / 8));
 
-    const x = Math.floor(e.offsetX / 100);
-    const y = Math.floor(e.offsetY / 100);
-    const piece = b.getPieceAt(x, y);
-    
-    piece ? b.renderLegalMoves(piece) : console.log('No piece found');
+    const piece = board.board[y][x];
+
+    board.renderBoard();
+    board.renderPieces();
+
+    if (!selectedPiece) {
+        if (!piece || ((piece.colour != 'White') == isWhiteTurn)) return;
+        selectedPiece = piece;
+        moves = selectedPiece.getMoves(board.board);
+        board.renderMoves(selectedPiece);
+    } else {
+        if (piece && piece.colour == selectedPiece.colour) {
+            selectedPiece = piece;
+            moves = selectedPiece.getMoves(board.board);
+            board.renderMoves(selectedPiece);
+        } else {
+            const move = moves.find((move) => move.x == x && move.y == y);
+            if (move) {
+                board.makeMove(selectedPiece, move);
+                isWhiteTurn = !isWhiteTurn;
+            }
+            selectedPiece = null;
+        }
+    }
 });

@@ -1,106 +1,67 @@
+import { Move } from "./move.js";
 
-const capitaliseFirstLetter = (string) => {
-    return string.charAt(0).toUpperCase() + string.slice(1);
-};
-
-export class Pawn {
-    constructor(ctx, x, y, color) {
-        this.ctx = ctx;
-        this.x = x;
-        this.y = y;
-        this.color = color;
-        this.imageName = `${capitaliseFirstLetter(color)} Pawn.png`
-    }
-
-    moveTo(x, y) {
+export class Piece {
+    constructor(colour, type, x, y) {
+        this.colour = colour;
+        this.type = type;
         this.x = x;
         this.y = y;
     }
 
-    getLegalMoves(board) {
-        const moves = [];
-        const dy = this.color === 'white' ? -1 : 1;
+    getMoves(board) { }
 
-        if (this.y + dy < 0 || this.y + dy > 7) {
-            return moves;
-        }
-
-        if (board[this.x][this.y + dy] === null) {
-            moves.push([this.x, this.y + dy]);
-            if (board[this.x][this.y + dy * 2] === null && this.color === 'white' ? this.y === 6 : this.y === 1) {
-                moves.push([this.x, this.y + dy * 2]);
-            }
-        }
-
-        if (this.x - 1 >= 0 && (board[this.x - 1][this.y + dy] !== null && board[this.x - 1][this.y + dy].color !== this.color)) {
-            moves.push([this.x - 1, this.y + dy]);
-        }
-        if (this.x + 1 < 8 && (board[this.x + 1][this.y + dy] !== null && board[this.x + 1][this.y + dy].color !== this.color)) {
-            moves.push([this.x + 1, this.y + dy]);
-        }
-
-        return moves;
-    }
+    onMove() { }
 }
 
-export class Rook {
-    constructor(ctx, x, y, color) {
-        this.ctx = ctx;
-        this.x = x;
-        this.y = y;
-        this.color = color;
-        this.imageName = `${capitaliseFirstLetter(color)} Rook.png`
+export class Pawn extends Piece {
+    constructor(colour, x, y) {
+        super(colour, 'Pawn', x, y);
+
+        this.justMovedTwo = false;
     }
 
-    moveTo(x, y) {
-        this.x = x;
-        this.y = y;
-    }
-
-    getLegalMoves(board) {
+    getMoves(board) {
         const moves = [];
+        const direction = this.colour === 'White' ? -1 : 1;
+        const x = this.x;
+        const y = this.y;
 
-        for (let i = this.x + 1; i < 8; i++) {
-            if (board[i][this.y] === null) {
-                moves.push([i, this.y]);
-            } else {
-                if (board[i][this.y].color !== this.color) {
-                    moves.push([i, this.y]);
-                }
-                break;
+        // Return if y is out of bounds
+        if (y <= 0 || y >= 7) return moves;
+
+        // Move forwards
+        if (board[y + direction][x] === null) {
+            moves.push(new Move(this, x, y + direction));
+            if (((this.colour === 'White') === (y === 6)) && board[y + direction * 2][x] === null) {
+                moves.push(new Move(this, x, y + direction * 2));
             }
         }
 
-        for (let i = this.x - 1; i >= 0; i--) {
-            if (board[i][this.y] === null) {
-                moves.push([i, this.y]);
-            } else {
-                if (board[i][this.y].color !== this.color) {
-                    moves.push([i, this.y]);
-                }
-                break;
+        // Capture diagonally
+        if (x + 1 < 8) {
+            if (board[y + direction][x + 1] !== null && board[y + direction][x + 1].colour !== this.colour) {
+                moves.push(new Move(this, x + 1, y + direction));
             }
         }
-
-        for (let i = this.y + 1; i < 8; i++) {
-            if (board[this.x][i] === null) {
-                moves.push([this.x, i]);
-            } else {
-                if (board[this.x][i].color !== this.color) {
-                    moves.push([this.x, i]);
-                }
-                break;
+        if (x - 1 > -1) {
+            if (board[y + direction][x - 1] !== null && board[y + direction][x - 1].colour !== this.colour) {
+                moves.push(new Move(this, x - 1, y + direction));
             }
         }
-
-        for (let i = this.y - 1; i >= 0; i--) {
-            if (board[this.x][i] === null) {
-                moves.push([this.x, i]);
-            } else {
-                if (board[this.x][i].color !== this.color) {
-                    moves.push([this.x, i]);
+        
+        // En Passant
+        if (x + 1 < 8) {
+            if (board[y][x + 1] !== null && board[y][x + 1].type == 'Pawn') {
+                if (board[y][x + 1].justMovedTwo) {
+                    moves.push(new Move(this, x + 1, y + direction, true));
                 }
-                break;
+            }
+        }
+        if (x - 1 > -1) {
+            if (board[y][x - 1] !== null && board[y][x - 1].type == 'Pawn') {
+                if (board[y][x - 1].justMovedTwo) {
+                    moves.push(new Move(this, x - 1, y + direction, true));
+                }
             }
         }
 
@@ -108,30 +69,35 @@ export class Rook {
     }
 }
 
-export class Knight {
-    constructor(ctx, x, y, color) {
-        this.ctx = ctx;
-        this.x = x;
-        this.y = y;
-        this.color = color;
-        this.imageName = `${capitaliseFirstLetter(color)} Knight.png`
+export class Knight extends Piece {
+    constructor(colour, x, y) {
+        super(colour, 'Knight', x, y);
     }
 
-    moveTo(x, y) {
-        this.x = x;
-        this.y = y;
-    }
-
-    getLegalMoves(board) {
+    getMoves(board) {
         const moves = [];
-        const delta = [[-2, -1], [-2, 1], [-1, -2], [-1, 2], [1, -2], [1, 2], [2, -1], [2, 1]]
+        
+        const options = [
+            new Move(this, this.x + 2, this.y + 1),
+            new Move(this, this.x + 2, this.y - 1),
+            new Move(this, this.x - 2, this.y + 1),
+            new Move(this, this.x - 2, this.y - 1),
+            new Move(this, this.x + 1, this.y + 2),
+            new Move(this, this.x + 1, this.y - 2),
+            new Move(this, this.x - 1, this.y + 2),
+            new Move(this, this.x - 1, this.y - 2)
+        ];
 
-        for (const [dx, dy] of delta) {
-            const newX = this.x + dx;
-            const newY = this.y + dy;
+        for (const move of options) {
+            if (move.x > -1 && move.x < 8 && move.y > -1 && move.y < 8) {
+                if (board[move.y][move.x] === null) {
+                    moves.push(move);
+                    continue;
+                }
 
-            if (newX >= 0 && newX < 8 && newY >= 0 && newY < 8 && (board[newX][newY] === null || board[newX][newY].color !== this.color)) {
-                moves.push([newX, newY]);
+                if (board[move.y][move.x].colour !== this.colour) {
+                    moves.push(move);
+                }
             }
         }
 
@@ -139,47 +105,201 @@ export class Knight {
     }
 }
 
-export class Bishop {
-    constructor(ctx, x, y, color) {
-        this.ctx = ctx;
-        this.x = x;
-        this.y = y;
-        this.color = color;
-        this.imageName = `${capitaliseFirstLetter(color)} Bishop.png`
+export class Rook extends Piece {
+    constructor(colour, x, y) {
+        super(colour, 'Rook', x, y);
+
+        this.canCastle = (this.x == 0 || this.x == 7) && ((this.colour == 'White') == (this.y == 7));
     }
 
-    moveTo(x, y) {
-        this.x = x;
-        this.y = y;
+    getMoves(board) {
+        const moves = [];
+
+        for (let x = this.x + 1; x < 8; x++) {
+            if (board[this.y][x] == null) {
+                moves.push(new Move(this, x, this.y))
+                continue;
+            }
+
+            if (board[this.y][x].colour == this.colour) {
+                break;
+            } else {
+                moves.push(new Move(this, x, this.y));
+                break;
+            }
+        }
+
+        for (let x = this.x - 1; x > -1; x--) {
+            if (board[this.y][x] == null) {
+                moves.push(new Move(this, x, this.y))
+                continue;
+            }
+
+            if (board[this.y][x].colour == this.colour) {
+                break;
+            } else {
+                moves.push(new Move(this, x, this.y));
+                break;
+            }
+        }
+
+        for (let y = this.y + 1; y < 8; y++) {
+            if (board[y][this.x] == null) {
+                moves.push(new Move(this, this.x, y))
+                continue;
+            }
+
+            if (board[y][this.x].colour == this.colour) {
+                break;
+            } else {
+                moves.push(new Move(this, this.x, y));
+                break;
+            }
+        }
+
+        for (let y = this.y - 1; y > -1; y--) {
+            if (board[y][this.x] == null) {
+                moves.push(new Move(this, this.x, y))
+                continue;
+            }
+
+            if (board[y][this.x].colour == this.colour) {
+                break;
+            } else {
+                moves.push(new Move(this, this.x, y));
+                break;
+            }
+        }
+
+        return moves;
+    }
+
+    onMove() {
+        this.canCastle = false;
     }
 }
 
-export class Queen {
-    constructor(ctx, x, y, color) {
-        this.ctx = ctx;
-        this.x = x;
-        this.y = y;
-        this.color = color;
-        this.imageName = `${capitaliseFirstLetter(color)} Queen.png`
+export class Bishop extends Piece {
+    constructor(colour, x, y) {
+        super(colour, 'Bishop', x, y);
     }
 
-    moveTo(x, y) {
-        this.x = x;
-        this.y = y;
+    getMoves(board) {
+        const moves = [];
+
+        for (let delta = 1; this.x + delta < 8 && this.y + delta < 8; delta++) {
+            if (board[this.y + delta][this.x + delta] == null) {
+                moves.push(new Move(this, this.x + delta, this.y + delta));
+            } else {
+                if (board[this.y + delta][this.x + delta].colour !== this.colour) {
+                    moves.push(new Move(this, this.x + delta, this.y + delta));
+                }
+                break;
+            }
+        }
+
+        for (let delta = 1; this.x - delta > -1 && this.y + delta < 8; delta++) {
+            if (board[this.y + delta][this.x - delta] == null) {
+                moves.push(new Move(this, this.x - delta, this.y + delta));
+            } else {
+                if (board[this.y + delta][this.x - delta].colour !== this.colour) {
+                    moves.push(new Move(this, this.x - delta, this.y + delta));
+                }
+                break;
+            }
+        }
+
+        for (let delta = 1; this.x + delta < 8 && this.y - delta > -1; delta++) {
+            if (board[this.y - delta][this.x + delta] == null) {
+                moves.push(new Move(this, this.x + delta, this.y - delta));
+            } else {
+                if (board[this.y - delta][this.x + delta].colour !== this.colour) {
+                    moves.push(new Move(this, this.x + delta, this.y - delta));
+                }
+                break;
+            }
+        }
+
+        for (let delta = 1; this.x - delta > -1 && this.y - delta > -1; delta++) {
+            if (board[this.y - delta][this.x - delta] == null) {
+                moves.push(new Move(this, this.x - delta, this.y - delta));
+            } else {
+                if (board[this.y - delta][this.x - delta].colour !== this.colour) {
+                    moves.push(new Move(this, this.x - delta, this.y - delta));
+                }
+                break;
+            }
+        }
+
+        return moves;
     }
 }
 
-export class King {
-    constructor(ctx, x, y, color) {
-        this.ctx = ctx;
-        this.x = x;
-        this.y = y;
-        this.color = color;
-        this.imageName = `${capitaliseFirstLetter(color)} King.png`
+export class Queen extends Piece {
+    constructor(colour, x, y) {
+        super(colour, 'Queen', x, y);
     }
 
-    moveTo(x, y) {
-        this.x = x;
-        this.y = y;
+    getMoves(board) {
+        const moves = [];
+
+        new Rook(this.colour, this.x, this.y).getMoves(board).forEach((move) => moves.push(move));
+        new Bishop(this.colour, this.x, this.y).getMoves(board).forEach((move) => moves.push(move));
+
+        return moves;
+    }
+}
+
+export class King extends Piece {
+    constructor(colour, x, y) {
+        super(colour, 'King', x, y);
+
+        this.canCastle = this.x == 4 && ((this.colour == 'White') == (this.y == 7));
+    }
+
+    getMoves(board) {
+        const moves = [];
+
+        const options = [
+            new Move(this, this.x + 1, this.y + 1),
+            new Move(this, this.x + 1, this.y - 1),
+            new Move(this, this.x - 1, this.y + 1),
+            new Move(this, this.x - 1, this.y - 1),
+            new Move(this, this.x + 1, this.y),
+            new Move(this, this.x - 1, this.y),
+            new Move(this, this.x, this.y + 1),
+            new Move(this, this.x, this.y - 1)
+        ];
+
+        for (const move of options) {
+            if (move.x > -1 && move.x < 8 && move.y > -1 && move.y < 8) {
+                if (board[move.y][move.x] === null) {
+                    moves.push(move);
+                    continue;
+                }
+
+                if (board[move.y][move.x].colour !== this.colour) {
+                    moves.push(move);
+                }
+            }
+        }
+
+        // Handle castling
+        if (board[this.y][0] !== null && board[this.y][0].type == 'Rook' && board[this.y][0].canCastle && this.canCastle) {
+            if (board[this.y][1] === null && board[this.y][2] === null && board[this.y][3] === null) {
+                moves.push(new Move(this, this.x - 2, this.y, false, true));
+            }
+        }
+        if (board[this.y][7] !== null && board[this.y][7].type == 'Rook' && board[this.y][7].canCastle && this.canCastle) {
+            if (board[this.y][6] === null && board[this.y][5] === null) {
+                moves.push(new Move(this, this.x + 2, this.y, false, false, true));
+            }
+        }
+
+        return moves
+    }
+
+    onMove() {
+        this.canCastle = false;
     }
 }
